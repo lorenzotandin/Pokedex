@@ -10,7 +10,7 @@ namespace Pokedex.Services
         {
         }
 
-        public async Task<Pokemon> GetBasicPokemonInfoAsync(string pokemonName)
+        public async Task<Pokemon?> GetBasicPokemonInfoAsync(string pokemonName)
         {
             //var pokemonInfoUrl = $"{POKE_API_BASE_URL}{pokemonName}";
 

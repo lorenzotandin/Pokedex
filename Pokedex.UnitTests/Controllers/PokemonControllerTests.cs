@@ -1,14 +1,8 @@
 ﻿using FakeItEasy;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pokedex.Controllers;
 using Pokedex.Models;
 using Pokedex.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pokedex.UnitTests.Controllers
 {
@@ -41,11 +35,9 @@ namespace Pokedex.UnitTests.Controllers
 
             var result = await _controller.Get(expectedPokemon.Name);
 
-            var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.That(okResult.StatusCode, Is.EqualTo(200));
+            AssertResultIs<OkObjectResult>(result, 200);
 
-            var pokemonResult = okResult.Value as Pokemon;
+            var pokemonResult = ((OkObjectResult)result).Value as Pokemon;
             Assert.IsNotNull(pokemonResult);
             Assert.AreEqual(expectedPokemon.Name, pokemonResult.Name);
             Assert.AreEqual(expectedPokemon.Description, pokemonResult.Description);
@@ -60,9 +52,37 @@ namespace Pokedex.UnitTests.Controllers
 
             var result = await _controller.Get(pokemonName);
 
-            var badRequestResult = result as BadRequestObjectResult;
-            Assert.IsNotNull(badRequestResult);
-            Assert.That(badRequestResult.StatusCode, Is.EqualTo(400));
+            AssertResultIs<BadRequestObjectResult>(result, 400);
+        }
+
+        [Test]
+        public async Task ShouldReturnServerError_IfThereIsAnException()
+        {
+            A.CallTo(() => _pokemonInfoAdapter.GetBasicPokemonInfoAsync(A<string>.Ignored))
+                .Throws<Exception>();
+
+            var result = await _controller.Get("pokemon name");
+
+            AssertResultIs<ObjectResult>(result, 500);
+        }
+
+        [Test]
+        public async Task ShouldReturnNotFound_IfAMatchingPokemonIsNotFound()
+        {
+            A.CallTo(() => _pokemonInfoAdapter.GetBasicPokemonInfoAsync(A<string>.Ignored))
+                .Returns((Pokemon?)null);
+
+            var result = await _controller.Get("pokemon name");
+
+            AssertResultIs<NotFoundObjectResult>(result, 404);
+        }
+
+        private static void AssertResultIs<T>(IActionResult result, int statusCode)
+            where T : ObjectResult
+        {
+            var actionResult = result as T;
+            Assert.IsNotNull(actionResult);
+            Assert.That(actionResult.StatusCode, Is.EqualTo(statusCode));
         }
     }
 }
