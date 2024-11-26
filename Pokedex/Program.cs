@@ -1,4 +1,6 @@
 
+using Pokedex.Services;
+
 namespace Pokedex
 {
     public class Program
@@ -13,6 +15,8 @@ namespace Pokedex
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddTransient<IPokemonInfoAdapter, PokeAPIAdapter>();
 
             var app = builder.Build();
 
