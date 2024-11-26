@@ -30,7 +30,10 @@ namespace Pokedex.UnitTests.Controllers
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.That(okResult.StatusCode, Is.EqualTo(200));
-            Assert.That(okResult.Value, Is.EqualTo(pokemonName));
+
+            var pokemonResult = okResult.Value as Pokemon;
+            Assert.IsNotNull(pokemonResult);
+            Assert.That(pokemonResult.Name, Is.EqualTo(pokemonName));
         }
 
         [Test]

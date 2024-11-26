@@ -14,7 +14,15 @@ namespace Pokedex.Controllers
             if (string.IsNullOrWhiteSpace(name))
                 return BadRequest("Pokemon name is required");
 
-            return Ok(name);
+            var pokemon = new Pokemon
+            {
+                Name = name,
+                Description = "description",
+                Habitat = "habitat",
+                IsLegendary = true
+            };
+
+            return Ok(pokemon);
         }
     }
 }
