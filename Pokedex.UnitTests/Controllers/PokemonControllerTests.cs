@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pokedex.Controllers;
+using Pokedex.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,18 @@ namespace Pokedex.UnitTests.Controllers
             Assert.IsNotNull(okResult);
             Assert.That(okResult.StatusCode, Is.EqualTo(200));
             Assert.That(okResult.Value, Is.EqualTo(pokemonName));
+        }
+
+        [Test]
+        public async Task ShouldReturnBadRequest_IfNameIsEmpty()
+        {
+            var pokemonName = "";
+
+            var result = await _controller.Get(pokemonName);
+
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.IsNotNull(badRequestResult);
+            Assert.That(badRequestResult.StatusCode, Is.EqualTo(400));
         }
     }
 }
