@@ -16,6 +16,8 @@ namespace Pokedex
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddHttpClient<IPokemonInfoAdapter, PokeAPIAdapter>();
+
             builder.Services.AddTransient<IPokemonInfoAdapter, PokeAPIAdapter>();
 
             var app = builder.Build();
