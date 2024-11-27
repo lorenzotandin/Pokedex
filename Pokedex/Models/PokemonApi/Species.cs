@@ -1,8 +1,16 @@
-﻿namespace Pokedex.Models.PokemonApi
+﻿using System.Text.Json.Serialization;
+
+namespace Pokedex.Models.PokemonApi
 {
     public class Species
     {
-        public string? Name { get; set; }
-        public string? Url { get; set; }
+        [JsonPropertyName("flavor_text_entries")]
+        public IEnumerable<FlavorTextEntry> FlavorTextEntries { get; set; }
+
+        [JsonPropertyName("habitat")]
+        public NameAndUrl Habitat { get; set; }
+
+        [JsonPropertyName("is_legendary")]
+        public bool IsLegendary { get; set; }
     }
 }

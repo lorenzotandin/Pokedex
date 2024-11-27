@@ -6,7 +6,7 @@ namespace Pokedex.Services
 {
     public class PokeAPIAdapter : IPokemonInfoAdapter
     {
-        string POKE_API_BASE_URL = "https://pokeapi.co/api/v2/pokemon/";
+        const string POKE_API_BASE_URL = "https://pokeapi.co/api/v2/pokemon/";
 
         private readonly HttpClient _httpClient;
 
@@ -34,24 +34,36 @@ namespace Pokedex.Services
             if (!response.IsSuccessStatusCode)
                 return null;
 
-            var pokemonResponse = await DeserializeContentAsync<PokemonApi.Pokemon>(response);
+            var pokemon = await DeserializeContentAsync<PokemonApi.Pokemon>(response);
+            
+            var speciesResponse = await _httpClient.GetAsync(pokemon!.Species!.Url);
 
-            //TODO: call to species api
+            if (!speciesResponse.IsSuccessStatusCode)
+                return null;
+
+            var species = await DeserializeContentAsync<PokemonApi.Species>(speciesResponse);
+
+            var description = species.FlavorTextEntries
+                .Where(e => e.Language?.Name == "en")
+                .FirstOrDefault()
+                ?.FlavorText
+                ?.Replace("\n", " ")
+                ?.Replace("\f", " ");
 
             return new Pokemon
             {
-                Name = pokemonResponse.Name,
-                Description = "description",
-                Habitat = "habitat",
-                IsLegendary = true
+                Name = pokemon.Name,
+                Description = description,
+                Habitat = species.Habitat.Name,
+                IsLegendary = species.IsLegendary
             };
         }
 
-        private async Task<T?> DeserializeContentAsync<T>(HttpResponseMessage response)
+        private async Task<T> DeserializeContentAsync<T>(HttpResponseMessage response)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
 
-            return JsonSerializer.Deserialize<T>(responseContent, _jsonSerializerOptions);
+            return JsonSerializer.Deserialize<T>(responseContent, _jsonSerializerOptions)!;
         }
     }
 }

@@ -39,10 +39,10 @@ namespace Pokedex.UnitTests.Controllers
 
             var pokemonResult = ((OkObjectResult)result).Value as Pokemon;
             Assert.IsNotNull(pokemonResult);
-            Assert.AreEqual(expectedPokemon.Name, pokemonResult.Name);
-            Assert.AreEqual(expectedPokemon.Description, pokemonResult.Description);
-            Assert.AreEqual(expectedPokemon.Habitat, pokemonResult.Habitat);
-            Assert.AreEqual(expectedPokemon.IsLegendary, pokemonResult.IsLegendary);
+            Assert.That(pokemonResult.Name, Is.EqualTo(expectedPokemon.Name));
+            Assert.That(pokemonResult.Description, Is.EqualTo(expectedPokemon.Description));
+            Assert.That(pokemonResult.Habitat, Is.EqualTo(expectedPokemon.Habitat));
+            Assert.That(pokemonResult.IsLegendary, Is.EqualTo(expectedPokemon.IsLegendary));
         }
 
         [Test]

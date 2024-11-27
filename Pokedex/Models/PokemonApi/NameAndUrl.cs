@@ -4,12 +4,12 @@ using System.Text.Json.Serialization;
 namespace Pokedex.Models.PokemonApi
 {
     [DebuggerDisplay("{Name}")]
-    public class Pokemon
+    public class NameAndUrl
     {
         [JsonPropertyName("name")]
         public string? Name { get; set; }
 
-        [JsonPropertyName("species")]
-        public NameAndUrl? Species { get; set; }
+        [JsonPropertyName("url")]
+        public string? Url { get; set; }
     }
 }
