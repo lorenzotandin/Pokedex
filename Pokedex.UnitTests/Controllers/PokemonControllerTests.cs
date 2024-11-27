@@ -37,6 +37,40 @@ namespace Pokedex.UnitTests.Controllers
             Assert.That(actionResult.StatusCode, Is.EqualTo(statusCode));
         }
 
+        private static PokemonDto CreatePokemonDto()
+        {
+            return new PokemonDto
+            {
+                Name = "pokemon name",
+                Description = "description",
+                Habitat = "habitat",
+                IsLegendary = false
+            };
+        }
+
+        public void SetupGetTranslation(TranslationLanguage language = TranslationLanguage.Shakespeare,
+            string? sourceText = "", string translatedText = "", bool isSuccessful = true)
+        {
+            A.CallTo(() => _translationAdapter.GetTranslationAsync(language, sourceText))
+                .Returns(new TranslationResult
+                {
+                    TranslationSuccessful = isSuccessful,
+                    TranslatedText = translatedText
+                });
+        }
+
+        public void AssertResultMatchesPokemon(IActionResult result, string? name, string? description, string? habitat, bool isLegendary)
+        {
+            AssertResultIs<OkObjectResult>(result, 200);
+
+            var pokemonResult = ((OkObjectResult)result).Value as Pokemon;
+            Assert.IsNotNull(pokemonResult);
+            Assert.That(pokemonResult.Name, Is.EqualTo(name));
+            Assert.That(pokemonResult.Description, Is.EqualTo(description));
+            Assert.That(pokemonResult.Habitat, Is.EqualTo(habitat));
+            Assert.That(pokemonResult.IsLegendary, Is.EqualTo(isLegendary));
+        }
+
         [Test]
         public async Task Get_ShouldReturnBadRequest_IfNameIsEmpty()
         {
@@ -60,26 +94,17 @@ namespace Pokedex.UnitTests.Controllers
         [Test]
         public async Task Get_ShouldReturnThePokemon_IfFound()
         {
-            var expectedPokemon = new PokemonDto
-            { 
-                Name = "pokemon name",
-                Description = "description",
-                Habitat = "habitat",
-                IsLegendary = true
-            };
+            var expectedPokemon = CreatePokemonDto();
 
             SetupGetBasicPokemonInfo(expectedPokemon);
 
             var result = await _controller.Get(expectedPokemon.Name);
 
-            AssertResultIs<OkObjectResult>(result, 200);
-
-            var pokemonResult = ((OkObjectResult)result).Value as Pokemon;
-            Assert.IsNotNull(pokemonResult);
-            Assert.That(pokemonResult.Name, Is.EqualTo(expectedPokemon.Name));
-            Assert.That(pokemonResult.Description, Is.EqualTo(expectedPokemon.Description));
-            Assert.That(pokemonResult.Habitat, Is.EqualTo(expectedPokemon.Habitat));
-            Assert.That(pokemonResult.IsLegendary, Is.EqualTo(expectedPokemon.IsLegendary));
+            AssertResultMatchesPokemon(result,
+                name: expectedPokemon.Name,
+                description: expectedPokemon.Description,
+                habitat: expectedPokemon.Habitat,
+                isLegendary: expectedPokemon.IsLegendary);
         }
 
         [Test]
@@ -117,81 +142,51 @@ namespace Pokedex.UnitTests.Controllers
         [TestCase("rare", true)]
         public async Task GetTranslated_ShouldReturnThePokemonWithYodaTranslationOnDescription(string habitat, bool isLegendary)
         {
-            var expectedPokemon = new PokemonDto
-            {
-                Name = "pokemon name",
-                Description = "description",
-                Habitat = habitat,
-                IsLegendary = isLegendary
-            };
+            var expectedPokemon = CreatePokemonDto();
+            expectedPokemon.Habitat = habitat;
+            expectedPokemon.IsLegendary = isLegendary;
 
             SetupGetBasicPokemonInfo(expectedPokemon);
 
             var expectedDescription = "yoda description";
 
-            A.CallTo(() => _translationAdapter.GetTranslationAsync(TranslationLanguage.Yoda, expectedPokemon.Description))
-                .Returns(new TranslationResult
-                { 
-                    TranslationSuccessful = true,
-                    TranslatedText = expectedDescription
-                });
+            SetupGetTranslation(TranslationLanguage.Yoda, sourceText: expectedPokemon.Description, translatedText: expectedDescription);
 
             var result = await _controller.GetTranslated(expectedPokemon.Name);
 
-            AssertResultIs<OkObjectResult>(result, 200);
-
-            var pokemonResult = ((OkObjectResult)result).Value as Pokemon;
-            Assert.IsNotNull(pokemonResult);
-            Assert.That(pokemonResult.Name, Is.EqualTo(expectedPokemon.Name));
-            Assert.That(pokemonResult.Description, Is.EqualTo(expectedDescription));
-            Assert.That(pokemonResult.Habitat, Is.EqualTo(expectedPokemon.Habitat));
-            Assert.That(pokemonResult.IsLegendary, Is.EqualTo(expectedPokemon.IsLegendary));
+            AssertResultMatchesPokemon(result,
+                name: expectedPokemon.Name,
+                description: expectedDescription,
+                habitat: expectedPokemon.Habitat,
+                isLegendary: expectedPokemon.IsLegendary);
         }
 
         [TestCase("anything but cave")]
         public async Task GetTranslated_ShouldReturnThePokemonWithShakespeareTranslationOnDescription(string habitat)
         {
-            var expectedPokemon = new PokemonDto
-            {
-                Name = "pokemon name",
-                Description = "description",
-                Habitat = habitat,
-                IsLegendary = false
-            };
+            var expectedPokemon = CreatePokemonDto();
+            expectedPokemon.Habitat = habitat;
+            expectedPokemon.IsLegendary = false;
 
             SetupGetBasicPokemonInfo(expectedPokemon);
 
             var expectedDescription = "shakespeare description";
 
-            A.CallTo(() => _translationAdapter.GetTranslationAsync(TranslationLanguage.Shakespeare, expectedPokemon.Description))
-                .Returns(new TranslationResult
-                {
-                    TranslationSuccessful = true,
-                    TranslatedText = expectedDescription
-                });
+            SetupGetTranslation(TranslationLanguage.Shakespeare, sourceText: expectedPokemon.Description, translatedText: expectedDescription);
 
             var result = await _controller.GetTranslated(expectedPokemon.Name);
 
-            AssertResultIs<OkObjectResult>(result, 200);
-
-            var pokemonResult = ((OkObjectResult)result).Value as Pokemon;
-            Assert.IsNotNull(pokemonResult);
-            Assert.That(pokemonResult.Name, Is.EqualTo(expectedPokemon.Name));
-            Assert.That(pokemonResult.Description, Is.EqualTo(expectedDescription));
-            Assert.That(pokemonResult.Habitat, Is.EqualTo(expectedPokemon.Habitat));
-            Assert.That(pokemonResult.IsLegendary, Is.EqualTo(expectedPokemon.IsLegendary));
+            AssertResultMatchesPokemon(result,
+                name: expectedPokemon.Name,
+                description: expectedDescription,
+                habitat: expectedPokemon.Habitat,
+                isLegendary: expectedPokemon.IsLegendary);
         }
 
         [Test]
         public async Task GetTranslated_ShouldReturnThePokemonWithStandardDescription_IfTranslationThrowsException()
         {
-            var expectedPokemon = new PokemonDto
-            {
-                Name = "pokemon name",
-                Description = "description",
-                Habitat = "habitat",
-                IsLegendary = false
-            };
+            var expectedPokemon = CreatePokemonDto();
 
             SetupGetBasicPokemonInfo(expectedPokemon);
 
@@ -200,45 +195,29 @@ namespace Pokedex.UnitTests.Controllers
 
             var result = await _controller.GetTranslated(expectedPokemon.Name);
 
-            AssertResultIs<OkObjectResult>(result, 200);
-
-            var pokemonResult = ((OkObjectResult)result).Value as Pokemon;
-            Assert.IsNotNull(pokemonResult);
-            Assert.That(pokemonResult.Name, Is.EqualTo(expectedPokemon.Name));
-            Assert.That(pokemonResult.Description, Is.EqualTo(expectedPokemon.Description));
-            Assert.That(pokemonResult.Habitat, Is.EqualTo(expectedPokemon.Habitat));
-            Assert.That(pokemonResult.IsLegendary, Is.EqualTo(expectedPokemon.IsLegendary));
+            AssertResultMatchesPokemon(result,
+                name: expectedPokemon.Name,
+                description: expectedPokemon.Description,
+                habitat: expectedPokemon.Habitat,
+                isLegendary: expectedPokemon.IsLegendary);
         }
 
         [Test]
         public async Task GetTranslated_ShouldReturnThePokemonWithStandardDescription_IfTranslationIsNotPossible()
         {
-            var expectedPokemon = new PokemonDto
-            {
-                Name = "pokemon name",
-                Description = "description",
-                Habitat = "habitat",
-                IsLegendary = false
-            };
+            var expectedPokemon = CreatePokemonDto();
 
             SetupGetBasicPokemonInfo(expectedPokemon);
 
-            A.CallTo(() => _translationAdapter.GetTranslationAsync(TranslationLanguage.Shakespeare, expectedPokemon.Description))
-                .Returns(new TranslationResult
-                {
-                    TranslationSuccessful = false
-                });
+            SetupGetTranslation(isSuccessful: false);
 
             var result = await _controller.GetTranslated(expectedPokemon.Name);
 
-            AssertResultIs<OkObjectResult>(result, 200);
-
-            var pokemonResult = ((OkObjectResult)result).Value as Pokemon;
-            Assert.IsNotNull(pokemonResult);
-            Assert.That(pokemonResult.Name, Is.EqualTo(expectedPokemon.Name));
-            Assert.That(pokemonResult.Description, Is.EqualTo(expectedPokemon.Description));
-            Assert.That(pokemonResult.Habitat, Is.EqualTo(expectedPokemon.Habitat));
-            Assert.That(pokemonResult.IsLegendary, Is.EqualTo(expectedPokemon.IsLegendary));
+            AssertResultMatchesPokemon(result,
+                name: expectedPokemon.Name,
+                description: expectedPokemon.Description,
+                habitat: expectedPokemon.Habitat,
+                isLegendary: expectedPokemon.IsLegendary);
         }
 
         [Test]
