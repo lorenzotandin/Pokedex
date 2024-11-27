@@ -1,5 +1,6 @@
 
 using Pokedex.Services;
+using Pokedex.Services.Interfaces;
 
 namespace Pokedex
 {
@@ -17,8 +18,10 @@ namespace Pokedex
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddHttpClient<IPokemonInfoAdapter, PokeAPIAdapter>();
+            builder.Services.AddHttpClient<ITranslationAdapter, FunTranslationAdapter>();
 
             builder.Services.AddTransient<IPokemonInfoAdapter, PokeAPIAdapter>();
+            builder.Services.AddTransient<ITranslationAdapter, FunTranslationAdapter>();
 
             var app = builder.Build();
 

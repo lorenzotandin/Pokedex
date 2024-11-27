@@ -1,4 +1,5 @@
 ﻿using Pokedex.Models;
+using Pokedex.Services.Interfaces;
 using System.Text.Json;
 using PokemonApi = Pokedex.Models.PokemonApi;
 
@@ -22,7 +23,7 @@ namespace Pokedex.Services
             };
         }
 
-        public async Task<Pokemon?> GetBasicPokemonInfoAsync(string? pokemonName)
+        public async Task<PokemonDto?> GetBasicPokemonInfoAsync(string? pokemonName)
         {
             if (string.IsNullOrEmpty(pokemonName))
                 return null;
@@ -50,7 +51,7 @@ namespace Pokedex.Services
                 ?.Replace("\n", " ")
                 ?.Replace("\f", " ");
 
-            return new Pokemon
+            return new PokemonDto
             {
                 Name = pokemon.Name,
                 Description = description,
