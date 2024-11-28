@@ -60,7 +60,7 @@ namespace Pokedex.Controllers
 
                 var pokemon = Map(pokemonResult.Pokemon);
 
-                var translation = (pokemon.Habitat == "cave" || pokemon.IsLegendary)
+                var translation = (pokemonResult.Pokemon.HabitatIsCave || pokemon.IsLegendary)
                     ? TranslationLanguage.Yoda
                     : TranslationLanguage.Shakespeare;
 

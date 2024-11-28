@@ -49,7 +49,7 @@ namespace Pokedex.Services
             var translation = await DeserializeContentAsync<FunTranslation.Translation>(response);
 
             if (translation!.Success!.Total == 1)
-                return TranslationApiResult.Success(translation!.Contents!.Translated);
+                return TranslationApiResult.Success(translation!.Contents!.Translated!.Replace("  ", " "));
 
             return TranslationApiResult.Failure();
         }

@@ -7,6 +7,8 @@
         public string? Description { get; set; } = string.Empty;
 
         public string? Habitat { get; set; } = string.Empty;
+        
+        public bool HabitatIsCave => Habitat?.ToLower() == "cave";
 
         public bool IsLegendary { get; set; }
     }
