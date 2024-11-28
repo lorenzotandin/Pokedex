@@ -1,4 +1,5 @@
-﻿using System.Reflection.Metadata.Ecma335;
+﻿using System.Text.Json;
+using FunTranslation = Pokedex.Models.FunTranslation;
 using Pokedex.Services.Enum;
 using Pokedex.Services.Interfaces;
 
@@ -10,15 +11,22 @@ namespace Pokedex.Services
 
         private readonly HttpClient _httpClient;
 
+        private JsonSerializerOptions _jsonSerializerOptions;
+
         public FunTranslationAdapter(HttpClient httpClient)
         {
             _httpClient = httpClient;
+
+            _jsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
         }
 
-        public async Task<TranslationResult> GetTranslationAsync(TranslationLanguage language, string? text)
+        public async Task<TranslationApiResult> GetTranslationAsync(TranslationLanguage language, string? text)
         {
             if (string.IsNullOrEmpty(text))
-                return new TranslationResult();
+                return TranslationApiResult.Failure();
 
             var funTranslationUrl = language switch
             {
@@ -26,7 +34,31 @@ namespace Pokedex.Services
                 TranslationLanguage.Shakespeare => $"{FUN_TRANSLATION_BASE_URL}shakespeare.json",
             };
 
-            return new TranslationResult();
+            var postData = new Dictionary<string, string>
+            {
+                { "text", text }
+            };
+
+            var content = new FormUrlEncodedContent(postData);
+
+            var response = await _httpClient.PostAsync(funTranslationUrl, content);
+
+            if (!response.IsSuccessStatusCode)
+                return TranslationApiResult.Failure();
+
+            var translation = await DeserializeContentAsync<FunTranslation.Translation>(response);
+
+            if (translation!.Success!.Total == 1)
+                return TranslationApiResult.Success(translation!.Contents!.Translated);
+
+            return TranslationApiResult.Failure();
+        }
+
+        private async Task<T> DeserializeContentAsync<T>(HttpResponseMessage response)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<T>(responseContent, _jsonSerializerOptions)!;
         }
     }
 }

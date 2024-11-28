@@ -4,6 +4,6 @@ namespace Pokedex.Services.Interfaces
 {
     public interface ITranslationAdapter
     {
-        Task<TranslationResult> GetTranslationAsync(TranslationLanguage language, string? text);
+        Task<TranslationApiResult> GetTranslationAsync(TranslationLanguage language, string? text);
     }
 }

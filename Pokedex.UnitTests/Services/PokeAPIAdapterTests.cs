@@ -6,9 +6,8 @@ using System.Text.Json;
 
 namespace Pokedex.UnitTests.Services
 {
-    public class PokeAPIAdapterTests
+    public class PokeAPIAdapterTests : BaseAdapterTests
     {
-        private FakeableHttpMessageHandler _httpMessageHandler;
         private PokeAPIAdapter _pokeAPIAdapter;
         private const string _pokemonUrl = "https://pokeapi.co/api/v2/pokemon/";
         private const string _speciesUrl = "https://pokeapi.co/api/v2/pokemon-species/150/";
@@ -16,36 +15,9 @@ namespace Pokedex.UnitTests.Services
         [SetUp]
         public void Setup()
         {
-            _httpMessageHandler = A.Fake<FakeableHttpMessageHandler>();
-
             var httpClient = new HttpClient(_httpMessageHandler);
 
             _pokeAPIAdapter = new PokeAPIAdapter(httpClient);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _httpMessageHandler.Dispose();
-        }
-
-        private void SetupHttpClient(string? content = null, HttpStatusCode statusCode = HttpStatusCode.OK, string? requestUriPart = null)
-        {
-            var response = new HttpResponseMessage
-            {
-                StatusCode = statusCode
-            };
-
-            if (!string.IsNullOrEmpty(content))
-                response.Content = new StringContent(content);
-
-            Func<HttpRequestMessage, bool> requestMatcher = requestUriPart == null
-                ? r => true
-                : r => r.RequestUri!.ToString().StartsWith(requestUriPart);
-
-            A.CallTo(() => _httpMessageHandler.FakeSendAsync(
-                A<HttpRequestMessage>.That.Matches(r => requestMatcher(r)), A<CancellationToken>.Ignored))
-                .Returns(response);
         }
 
         [TestCase(null)]

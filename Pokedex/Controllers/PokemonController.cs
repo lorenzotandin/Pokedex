@@ -68,7 +68,7 @@ namespace Pokedex.Controllers
                 {
                     var translationResult = await _translationAdapter.GetTranslationAsync(translation, pokemon.Description);
 
-                    if (translationResult.TranslationSuccessful)
+                    if (translationResult.IsSuccessful)
                         pokemon.Description = translationResult.TranslatedText;
                 }
                 catch (Exception)

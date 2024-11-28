@@ -52,11 +52,7 @@ namespace Pokedex.UnitTests.Controllers
             string? sourceText = "", string translatedText = "", bool isSuccessful = true)
         {
             A.CallTo(() => _translationAdapter.GetTranslationAsync(language, sourceText))
-                .Returns(new TranslationResult
-                {
-                    TranslationSuccessful = isSuccessful,
-                    TranslatedText = translatedText
-                });
+                .Returns(isSuccessful ? TranslationApiResult.Success(translatedText) : TranslationApiResult.Failure());
         }
 
         public void AssertResultMatchesPokemon(IActionResult result, string? name, string? description, string? habitat, bool isLegendary)
