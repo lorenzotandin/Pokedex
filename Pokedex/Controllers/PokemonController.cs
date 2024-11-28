@@ -27,12 +27,12 @@ namespace Pokedex.Controllers
                 if (string.IsNullOrWhiteSpace(name))
                     return BadRequest(new { Message = $"'{nameof(name)}' field is missing." });
 
-                var pokemonDto = await _pokemonInfoAdapter.GetBasicPokemonInfoAsync(name);
+                var pokemonResult = await _pokemonInfoAdapter.GetBasicPokemonInfoAsync(name);
 
-                if (pokemonDto == null)
+                if (!pokemonResult.IsSuccessful)
                     return NotFound(new { Message = $"'{name}' pokemon not found." });
 
-                var pokemon = Map(pokemonDto);
+                var pokemon = Map(pokemonResult.Pokemon);
 
                 return Ok(pokemon);
             }
@@ -53,12 +53,12 @@ namespace Pokedex.Controllers
                 if (string.IsNullOrWhiteSpace(name))
                     return BadRequest(new { Message = $"'{nameof(name)}' field is missing." });
 
-                var pokemonDto = await _pokemonInfoAdapter.GetBasicPokemonInfoAsync(name);
+                var pokemonResult = await _pokemonInfoAdapter.GetBasicPokemonInfoAsync(name);
 
-                if (pokemonDto == null)
+                if (!pokemonResult.IsSuccessful)
                     return NotFound(new { Message = $"'{name}' pokemon not found." });
 
-                var pokemon = Map(pokemonDto);
+                var pokemon = Map(pokemonResult.Pokemon);
 
                 var translation = (pokemon.Habitat == "cave" || pokemon.IsLegendary)
                     ? TranslationLanguage.Yoda

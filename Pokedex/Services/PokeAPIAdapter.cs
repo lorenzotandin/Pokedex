@@ -23,24 +23,24 @@ namespace Pokedex.Services
             };
         }
 
-        public async Task<PokemonDto?> GetBasicPokemonInfoAsync(string? pokemonName)
+        public async Task<PokemonApiResult> GetBasicPokemonInfoAsync(string? pokemonName)
         {
             if (string.IsNullOrEmpty(pokemonName))
-                return null;
+                return PokemonApiResult.Failure();
 
             var pokemonInfoUrl = $"{POKE_API_BASE_URL}{pokemonName}";
 
             var response = await _httpClient.GetAsync(pokemonInfoUrl);
 
             if (!response.IsSuccessStatusCode)
-                return null;
+                return PokemonApiResult.Failure();
 
             var pokemon = await DeserializeContentAsync<PokemonApi.Pokemon>(response);
             
             var speciesResponse = await _httpClient.GetAsync(pokemon!.Species!.Url);
 
             if (!speciesResponse.IsSuccessStatusCode)
-                return null;
+                return PokemonApiResult.Failure();
 
             var species = await DeserializeContentAsync<PokemonApi.Species>(speciesResponse);
 
@@ -51,13 +51,13 @@ namespace Pokedex.Services
                 ?.Replace("\n", " ")
                 ?.Replace("\f", " ");
 
-            return new PokemonDto
+            return PokemonApiResult.Success(new PokemonDto
             {
                 Name = pokemon.Name,
                 Description = description,
                 Habitat = species.Habitat.Name,
                 IsLegendary = species.IsLegendary
-            };
+            });
         }
 
         private async Task<T> DeserializeContentAsync<T>(HttpResponseMessage response)

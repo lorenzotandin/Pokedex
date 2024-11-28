@@ -26,7 +26,7 @@ namespace Pokedex.UnitTests.Controllers
         public void SetupGetBasicPokemonInfo(PokemonDto? pokemon)
         {
             A.CallTo(() => _pokemonInfoAdapter.GetBasicPokemonInfoAsync(A<string>.Ignored))
-                .Returns(pokemon);
+                .Returns(pokemon == null ? PokemonApiResult.Failure() : PokemonApiResult.Success(pokemon));
         }
 
         private static void AssertResultIs<T>(IActionResult result, int statusCode)

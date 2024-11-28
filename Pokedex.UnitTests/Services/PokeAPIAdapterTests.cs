@@ -1,8 +1,5 @@
-﻿using FakeItEasy;
-using Pokedex.Models;
-using Pokedex.Services;
+﻿using Pokedex.Services;
 using System.Net;
-using System.Text.Json;
 
 namespace Pokedex.UnitTests.Services
 {
@@ -24,9 +21,9 @@ namespace Pokedex.UnitTests.Services
         [TestCase("")]
         public async Task ShouldReturnNull_IfThePokemonNameIsNullOrEmpty(string? pokemonName)
         {
-            var pokemon = await _pokeAPIAdapter.GetBasicPokemonInfoAsync(pokemonName);
+            var pokemonResult = await _pokeAPIAdapter.GetBasicPokemonInfoAsync(pokemonName);
 
-            Assert.That(pokemon, Is.Null);
+            Assert.That(pokemonResult.IsSuccessful, Is.False);
         }
 
         [Test]
@@ -34,9 +31,9 @@ namespace Pokedex.UnitTests.Services
         {
             SetupHttpClient(statusCode: HttpStatusCode.NotFound);
 
-            var pokemon = await _pokeAPIAdapter.GetBasicPokemonInfoAsync("pokemonName");
+            var pokemonResult = await _pokeAPIAdapter.GetBasicPokemonInfoAsync("pokemonName");
 
-            Assert.That(pokemon, Is.Null);
+            Assert.That(pokemonResult.IsSuccessful, Is.False);
         }
 
         [Test]
@@ -50,9 +47,9 @@ namespace Pokedex.UnitTests.Services
 
             SetupHttpClient(statusCode: HttpStatusCode.NotFound, requestUriPart: _speciesUrl);
 
-            var pokemon = await _pokeAPIAdapter.GetBasicPokemonInfoAsync(pokemonName);
+            var pokemonResult = await _pokeAPIAdapter.GetBasicPokemonInfoAsync(pokemonName);
 
-            Assert.That(pokemon, Is.Null);
+            Assert.That(pokemonResult.IsSuccessful, Is.False);
         }
 
         private static string GetMewtwoPokemonContent()
@@ -98,13 +95,13 @@ namespace Pokedex.UnitTests.Services
 
             SetupHttpClient(speciesContent, requestUriPart: _speciesUrl);
 
-            var pokemon = await _pokeAPIAdapter.GetBasicPokemonInfoAsync(expectedPokemonName);
+            var pokemonResult = await _pokeAPIAdapter.GetBasicPokemonInfoAsync(expectedPokemonName);
 
-            Assert.That(pokemon, Is.Not.Null);
-            Assert.That(pokemon.Name, Is.EqualTo(expectedPokemonName));
-            Assert.That(pokemon.Description, Is.EqualTo(expectedDescription));
-            Assert.That(pokemon.Habitat, Is.EqualTo(expectedHabitat));
-            Assert.That(pokemon.IsLegendary, Is.EqualTo(expectedIsLegendary));
+            Assert.That(pokemonResult.IsSuccessful, Is.True);
+            Assert.That(pokemonResult.Pokemon.Name, Is.EqualTo(expectedPokemonName));
+            Assert.That(pokemonResult.Pokemon.Description, Is.EqualTo(expectedDescription));
+            Assert.That(pokemonResult.Pokemon.Habitat, Is.EqualTo(expectedHabitat));
+            Assert.That(pokemonResult.Pokemon.IsLegendary, Is.EqualTo(expectedIsLegendary));
         }
 
         [Test]
@@ -143,10 +140,10 @@ namespace Pokedex.UnitTests.Services
 
             SetupHttpClient(speciesContent, requestUriPart: _speciesUrl);
 
-            var pokemon = await _pokeAPIAdapter.GetBasicPokemonInfoAsync(expectedPokemonName);
+            var pokemonResult = await _pokeAPIAdapter.GetBasicPokemonInfoAsync(expectedPokemonName);
 
-            Assert.That(pokemon, Is.Not.Null);
-            Assert.That(pokemon.Description, Is.EqualTo(expectedDescription));
+            Assert.That(pokemonResult.IsSuccessful, Is.True);
+            Assert.That(pokemonResult.Pokemon.Description, Is.EqualTo(expectedDescription));
         }
     }
 }

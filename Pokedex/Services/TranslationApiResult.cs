@@ -1,6 +1,4 @@
-﻿using Pokedex.Models;
-
-namespace Pokedex.Services
+﻿namespace Pokedex.Services
 {
     public class TranslationApiResult
     {
